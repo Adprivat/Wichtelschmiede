@@ -1,0 +1,35 @@
+<% layout('layout') %>
+<h1>Gießpulver</h1>
+<a href="/casting-powders/new" class="btn btn-primary mb-3">Neues Gießpulver anlegen</a>
+<table class="table table-bordered table-responsive">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Wasseranteil</th>
+      <th>Pulveranteil</th>
+      <th>Preis pro Gramm</th>
+      <th>Aktionen</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% if (powders.length === 0) { %>
+      <tr>
+        <td colspan="6" class="text-center">Keine Gießpulver gefunden.</td>
+      </tr>
+    <% } else { %>
+      <% powders.forEach(powder => { %>
+        <tr>
+          <td><%= powder.id %></td>
+          <td><%= powder.name %></td>
+          <td><%= powder.water_ratio %></td>
+          <td><%= powder.powder_ratio %></td>
+          <td><%= powder.price_per_gram %></td>
+          <td>
+            <a href="/casting-powders/<%= powder.id %>/edit" class="btn btn-sm btn-warning">Bearbeiten</a>
+          </td>
+        </tr>
+      <% }); %>
+    <% } %>
+  </tbody>
+</table>

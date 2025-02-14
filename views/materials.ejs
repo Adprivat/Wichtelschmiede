@@ -1,0 +1,38 @@
+<% layout('layout') %>
+<h1>Materialien</h1>
+<a href="/materials/new" class="btn btn-primary mb-3">Neues Material anlegen</a>
+<a href="/materials/export" class="btn btn-secondary mb-3">CSV Export</a>
+<table class="table table-bordered table-responsive">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Bezugsquelle</th>
+      <th>Preis</th>
+      <th>Preis pro Einheit</th>
+      <th>Bild</th>
+      <th>Aktionen</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% materials.forEach(material => { %>
+      <tr>
+        <td><%= material.id %></td>
+        <td><%= material.name %></td>
+        <td><%= material.source %></td>
+        <td><%= material.price %></td>
+        <td><%= material.unit_price %></td>
+        <td>
+          <% if(material.image) { %>
+            <img src="/image/material/<%= material.id %>" alt="Bild" style="max-width:100px;">
+          <% } else { %>
+            Kein Bild
+          <% } %>
+        </td>
+        <td>
+          <a href="/materials/<%= material.id %>/edit" class="btn btn-sm btn-warning">Bearbeiten</a>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>

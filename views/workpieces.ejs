@@ -1,0 +1,70 @@
+<% layout('layout') %>
+<% if (detail) { %>
+  <h1>Werkstück: <%= workpieces[0].name %></h1>
+  <p><strong>Gesamtherstellungskosten:</strong> <%= totalCost.toFixed(2) %> €</p>
+
+  <h3>Materialien</h3>
+  <ul>
+    <% workpieces[0].Materials.forEach(function(material) { %>
+      <li>
+        <%= material.name %> – Menge: <%= material.WorkPieceMaterial.quantity %> 
+        (Einheitspreis: <%= material.unit_price %> €)
+      </li>
+    <% }); %>
+  </ul>
+
+  <h3>Gießformen</h3>
+  <ul>
+    <% workpieces[0].Molds.forEach(function(mold) { %>
+      <li>
+        <%= mold.name %> – Füllmenge: <%= mold.fill_volume %>;
+        Verwendetes Gießpulver: 
+        <% if(mold.WorkPieceMold && mold.WorkPieceMold.CastingPowderId) { %>
+          <% 
+            // Suche in powders das Gießpulver mit der hinterlegten ID
+            var usedPowder = powders.find(p => p.id === mold.WorkPieceMold.CastingPowderId);
+          %>
+          <%= usedPowder ? usedPowder.name : 'unbekannt' %>
+        <% } else { %>
+          nicht ausgewählt
+        <% } %>
+      </li>
+    <% }); %>
+  </ul>
+  <a href="/workpieces" class="btn btn-secondary">Zurück zur Übersicht</a>
+<% } else { %>
+  <h1>Werkstücke</h1>
+  <a href="/workpieces/new" class="btn btn-primary mb-3">Neues Werkstück anlegen</a>
+  <table class="table table-bordered table-responsive">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Bild</th>
+        <th>Aktionen</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% workpieces.forEach(function(wp) { %>
+        <tr>
+          <td><%= wp.id %></td>
+          <td><%= wp.name %></td>
+          <td>
+            <% if(wp.image) { %>
+              <img src="/image/workpiece/<%= wp.id %>" alt="Bild" style="max-width:100px;">
+            <% } else { %>
+              Kein Bild
+            <% } %>
+          </td>
+          <td>
+            <a href="/workpieces/<%= wp.id %>" class="btn btn-info btn-sm">Details</a>
+            <a href="/workpieces/<%= wp.id %>/edit" class="btn btn-warning btn-sm">Bearbeiten</a>
+            <form action="/workpieces/<%= wp.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('Soll das Werkstück wirklich gelöscht werden?');">
+              <button type="submit" class="btn btn-danger btn-sm">Löschen</button>
+            </form>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+<% } %>

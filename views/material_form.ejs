@@ -1,0 +1,25 @@
+<% layout('layout') %>
+<h1><%= material ? 'Material bearbeiten' : 'Neues Material anlegen' %></h1>
+<form action="<%= material ? '/materials/' + material.id + '/edit' : '/materials/new' %>" method="post" enctype="multipart/form-data">
+  <div class="form-group">
+    <label>Name</label>
+    <input type="text" name="name" class="form-control" value="<%= material ? material.name : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Bezugsquelle</label>
+    <input type="text" name="source" class="form-control" value="<%= material ? material.source : '' %>">
+  </div>
+  <div class="form-group">
+    <label>Preis</label>
+    <input type="number" step="0.01" name="price" class="form-control" value="<%= material ? material.price : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Preis pro Einheit</label>
+    <input type="number" step="0.01" name="unit_price" class="form-control" value="<%= material ? material.unit_price : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Bild (optional)</label>
+    <input type="file" name="image" class="form-control-file">
+  </div>
+  <button type="submit" class="btn btn-success">Speichern</button>
+</form>

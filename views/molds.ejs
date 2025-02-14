@@ -1,0 +1,64 @@
+<% layout('layout') %>
+<h1>Gießformen</h1>
+<a href="/molds/new" class="btn btn-primary mb-3">Neue Gießform anlegen</a>
+<table class="table table-bordered table-responsive">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Füllmenge</th>
+      <th>Bild</th>
+      <th>Aktionen</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% molds.forEach(mold => { %>
+      <tr>
+        <td><%= mold.id %></td>
+        <td><%= mold.name %></td>
+        <td><%= mold.fill_volume %></td>
+        <td>
+          <% if(mold.image) { %>
+            <img src="/image/mold/<%= mold.id %>" alt="Bild" style="max-width:100px;">
+          <% } else { %>
+            Kein Bild
+          <% } %>
+        </td>
+        <td>
+          <a href="/molds/<%= mold.id %>/edit" class="btn btn-sm btn-warning">Bearbeiten</a>
+        </td>
+      </tr>
+    <% }); %>
+  </tbody>
+</table>
+
+<!-- Formular zur Berechnung -->
+<h2>Herstellungskosten berechnen</h2>
+<form action="/molds/calculate" method="post" class="form-inline">
+  <div class="form-group mb-2">
+    <label for="mold_id" class="mr-2">Gießform auswählen:</label>
+    <select name="mold_id" id="mold_id" class="form-control">
+      <% molds.forEach(mold => { %>
+          <option value="<%= mold.id %>"><%= mold.name %> (Füllmenge: <%= mold.fill_volume %>)</option>
+      <% }); %>
+    </select>
+  </div>
+  <div class="form-group mb-2 ml-2">
+    <label for="casting_powder_id" class="mr-2">Gießpulver auswählen:</label>
+    <select name="casting_powder_id" id="casting_powder_id" class="form-control">
+      <% powders.forEach(powder => { %>
+          <option value="<%= powder.id %>"><%= powder.name %></option>
+      <% }); %>
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary mb-2 ml-2">Berechnen</button>
+</form>
+
+<% if (typeof calc !== 'undefined') { %>
+  <h3>Berechnungsergebnis</h3>
+  <p>Gießform: <%= calc.mold.name %> (Füllmenge: <%= calc.mold.fill_volume %>)</p>
+  <p>Gießpulver: <%= calc.powder.name %></p>
+  <p>Benötigte Pulvermenge: <%= calc.powder_amount.toFixed(2) %></p>
+  <p>Benötigte Wassermenge: <%= calc.water_amount.toFixed(2) %></p>
+  <p>Herstellungskosten: <%= calc.cost.toFixed(2) %> €</p>
+<% } %>

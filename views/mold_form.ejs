@@ -1,0 +1,17 @@
+<% layout('layout') %>
+<h1><%= mold ? 'Gießform bearbeiten' : 'Neue Gießform anlegen' %></h1>
+<form action="<%= mold ? '/molds/' + mold.id + '/edit' : '/molds/new' %>" method="post" enctype="multipart/form-data">
+  <div class="form-group">
+    <label>Name</label>
+    <input type="text" name="name" class="form-control" value="<%= mold ? mold.name : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Füllmenge</label>
+    <input type="number" step="0.01" name="fill_volume" class="form-control" value="<%= mold ? mold.fill_volume : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Bild (optional)</label>
+    <input type="file" name="image" class="form-control-file">
+  </div>
+  <button type="submit" class="btn btn-success">Speichern</button>
+</form>
