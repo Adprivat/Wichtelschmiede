@@ -4,17 +4,31 @@ const engine = require('ejs-mate'); // ejs-mate einbinden
 const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
+const basicAuth = require('express-basic-auth');
 const { sequelize, Material, CastingPowder, Mold, WorkPiece, WorkPieceMaterial, WorkPieceMold } = require('./models');
 const { stringify } = require('csv-stringify');
-const { Op } = require('sequelize');  // Für die Suche
+const { Op } = require('sequelize');
 
 const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 
+// Prüfe, ob die benötigten Umgebungsvariablen gesetzt sind
+if (!process.env.BASIC_AUTH_USER || !process.env.BASIC_AUTH_PASSWORD) {
+  console.error("ERROR: BASIC_AUTH_USER und BASIC_AUTH_PASSWORD müssen als Umgebungsvariablen gesetzt sein!");
+  process.exit(1);
+}
+
+// Globaler Passwortschutz – die Zugangsdaten werden aus den Umgebungsvariablen gelesen.
+app.use(basicAuth({
+  users: { [process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASSWORD },
+  challenge: true,
+  unauthorizedResponse: 'Nicht autorisiert.'
+}));
+
 // EJS-Mate als Engine verwenden
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
-// Hinweis: In deiner layout.ejs kannst du nun den App-Namen z.B. "Wichtelschmiede Hofgeismar" setzen
+// In der layout.ejs kannst du im <title> z.B. "Wichtelschmiede Hofgeismar" eintragen
 app.set('views', path.join(__dirname, 'views'));
 
 // Statische Dateien aus dem Ordner "public" bereitstellen
@@ -495,7 +509,7 @@ app.get('/image/material/:id', async (req, res) => {
   }
 });
 
-// Sync DB und Serverstart Test
+// Sync DB und Serverstart
 sequelize.sync().then(() => {
   const port = process.env.PORT || 3000;
   app.listen(port, () => console.log(`Server läuft auf Port ${port}`));
