@@ -495,7 +495,7 @@ app.get('/image/material/:id', async (req, res) => {
   }
 });
 
-// Sync DB und Serverstart
+// Sync DB und Serverstart Test
 sequelize.sync().then(() => {
   const port = process.env.PORT || 3000;
   app.listen(port, () => console.log(`Server läuft auf Port ${port}`));
