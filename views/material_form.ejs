@@ -1,197 +1,25 @@
 <% layout('layout') %>
-<h1><%= workpiece ? 'Werkstück bearbeiten' : 'Neues Werkstück anlegen' %></h1>
-<form action="<%= workpiece ? '/workpieces/' + workpiece.id + '/edit' : '/workpieces/new' %>" method="post" enctype="multipart/form-data">
+<h1><%= material ? 'Material bearbeiten' : 'Neues Material anlegen' %></h1>
+<form action="<%= material ? '/materials/' + material.id + '/edit' : '/materials/new' %>" method="post" enctype="multipart/form-data">
   <div class="form-group">
-    <label>Name des Werkstücks</label>
-    <input type="text" name="name" class="form-control" value="<%= workpiece ? workpiece.name : '' %>" required>
+    <label>Name</label>
+    <input type="text" name="name" class="form-control" value="<%= material ? material.name : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Bezugsquelle</label>
+    <input type="text" name="source" class="form-control" value="<%= material ? material.source : '' %>">
+  </div>
+  <div class="form-group">
+    <label>Preis</label>
+    <input type="number" step="0.01" name="price" class="form-control" value="<%= material ? material.price : '' %>" required>
+  </div>
+  <div class="form-group">
+    <label>Preis pro Einheit</label>
+    <input type="number" step="0.01" name="unit_price" class="form-control" value="<%= material ? material.unit_price : '' %>" required>
   </div>
   <div class="form-group">
     <label>Bild (optional)</label>
     <input type="file" name="image" class="form-control-file">
-    <% if (workpiece && workpiece.image) { %>
-      <img src="/image/workpiece/<%= workpiece.id %>" alt="Bild" style="max-width:100px; margin-top:10px;">
-    <% } %>
   </div>
-
-  <h3>Materialien</h3>
-  <div id="materials-container">
-    <% if (workpiece && workpiece.Materials && workpiece.Materials.length > 0) { %>
-      <% workpiece.Materials.forEach(function(mat) { %>
-         <div class="form-row mb-2 dynamic-row">
-           <div class="col">
-             <select name="material_id" class="form-control">
-               <option value="">-- Material wählen --</option>
-               <% materials.forEach(function(m) { %>
-                 <option value="<%= m.id %>" <%= (m.id == mat.id) ? 'selected' : '' %>><%= m.name %></option>
-               <% }); %>
-             </select>
-           </div>
-           <div class="col">
-             <input type="number" step="0.01" name="quantity" class="form-control" placeholder="Menge" value="<%= mat.WorkPieceMaterial.quantity %>">
-           </div>
-         </div>
-      <% }); %>
-    <% } %>
-    <!-- Leere Zeile zur Eingabe -->
-    <div class="form-row mb-2 dynamic-row">
-       <div class="col">
-         <select name="material_id" class="form-control">
-           <option value="">-- Material wählen --</option>
-           <% materials.forEach(mat => { %>
-             <option value="<%= mat.id %>"><%= mat.name %></option>
-           <% }); %>
-         </select>
-       </div>
-       <div class="col">
-         <input type="number" step="0.01" name="quantity" class="form-control" placeholder="Menge">
-       </div>
-    </div>
-  </div>
-
-  <h3>Gießformen</h3>
-  <div id="molds-container">
-    <% if (workpiece && workpiece.Molds && workpiece.Molds.length > 0) { %>
-      <% workpiece.Molds.forEach(function(mold) { %>
-         <div class="form-row mb-2 dynamic-row">
-           <div class="col">
-             <select name="mold_id" class="form-control">
-               <option value="">-- Gießform wählen --</option>
-               <% molds.forEach(function(m) { %>
-                 <option value="<%= m.id %>" <%= (m.id == mold.id) ? 'selected' : '' %>><%= m.name %></option>
-               <% }); %>
-             </select>
-           </div>
-           <div class="col">
-             <select name="mold_casting_powder_id" class="form-control">
-               <option value="">-- Gießpulver wählen --</option>
-               <% powders.forEach(function(p) { %>
-                 <option value="<%= p.id %>" <%= (mold.WorkPieceMold && mold.WorkPieceMold.CastingPowderId == p.id) ? 'selected' : '' %>><%= p.name %></option>
-               <% }); %>
-             </select>
-           </div>
-         </div>
-      <% }); %>
-    <% } %>
-    <!-- Leere Zeile zur Eingabe -->
-    <div class="form-row mb-2 dynamic-row">
-       <div class="col">
-         <select name="mold_id" class="form-control">
-           <option value="">-- Gießform wählen --</option>
-           <% molds.forEach(mold => { %>
-             <option value="<%= mold.id %>"><%= mold.name %></option>
-           <% }); %>
-         </select>
-       </div>
-       <div class="col">
-         <select name="mold_casting_powder_id" class="form-control">
-           <option value="">-- Gießpulver wählen --</option>
-           <% powders.forEach(powder => { %>
-             <option value="<%= powder.id %>"><%= powder.name %></option>
-           <% }); %>
-         </select>
-       </div>
-    </div>
-  </div>
-
-  <button type="submit" class="btn btn-success mt-3"><%= workpiece ? 'Werkstück aktualisieren' : 'Werkstück speichern' %></button>
-  <% if(workpiece){ %>
-    <form action="/workpieces/<%= workpiece.id %>/delete" method="post" style="display:inline;">
-      <button type="submit" class="btn btn-danger mt-3 ml-2" onclick="return confirm('Soll das Werkstück wirklich gelöscht werden?');">Werkstück löschen</button>
-    </form>
-  <% } %>
+  <button type="submit" class="btn btn-success">Speichern</button>
 </form>
-
-<!-- Versteckte Templates für dynamische Zeilen -->
-<template id="material-template">
-  <div class="form-row mb-2 dynamic-row">
-    <div class="col">
-      <select name="material_id" class="form-control">
-        <option value="">-- Material wählen --</option>
-        <% materials.forEach(mat => { %>
-          <option value="<%= mat.id %>"><%= mat.name %></option>
-        <% }); %>
-      </select>
-    </div>
-    <div class="col">
-      <input type="number" step="0.01" name="quantity" class="form-control" placeholder="Menge">
-    </div>
-  </div>
-</template>
-
-<template id="mold-template">
-  <div class="form-row mb-2 dynamic-row">
-    <div class="col">
-      <select name="mold_id" class="form-control">
-        <option value="">-- Gießform wählen --</option>
-        <% molds.forEach(mold => { %>
-          <option value="<%= mold.id %>"><%= mold.name %></option>
-        <% }); %>
-      </select>
-    </div>
-    <div class="col">
-      <select name="mold_casting_powder_id" class="form-control">
-        <option value="">-- Gießpulver wählen --</option>
-        <% powders.forEach(powder => { %>
-          <option value="<%= powder.id %>"><%= powder.name %></option>
-        <% }); %>
-      </select>
-    </div>
-  </div>
-</template>
-
-<script>
-document.addEventListener('DOMContentLoaded', function(){
-  // Für beide Container wird geprüft, ob in der letzten Zeile bereits etwas eingegeben wurde.
-  // Wenn ja, wird automatisch eine neue Zeile eingefügt.
-  function checkAndAddRow(containerId, templateId) {
-    const container = document.getElementById(containerId);
-    const rows = container.querySelectorAll('.dynamic-row');
-    if(rows.length === 0) return;
-    const lastRow = rows[rows.length - 1];
-    let shouldAdd = false;
-    lastRow.querySelectorAll('input, select').forEach(function(input) {
-      if(input.value.trim() !== '') {
-        shouldAdd = true;
-      }
-    });
-    if(shouldAdd) {
-      const template = document.getElementById(templateId);
-      const clone = document.importNode(template.content, true);
-      container.appendChild(clone);
-      attachListeners();
-    }
-  }
-
-  function attachListeners() {
-    // Materialien
-    const materialContainer = document.getElementById('materials-container');
-    const materialRows = materialContainer.querySelectorAll('.dynamic-row');
-    const lastMaterialRow = materialRows[materialRows.length - 1];
-    lastMaterialRow.querySelectorAll('input, select').forEach(function(el) {
-      el.removeEventListener('change', materialListener);
-      el.addEventListener('change', materialListener);
-      el.removeEventListener('input', materialListener);
-      el.addEventListener('input', materialListener);
-    });
-
-    // Gießformen
-    const moldContainer = document.getElementById('molds-container');
-    const moldRows = moldContainer.querySelectorAll('.dynamic-row');
-    const lastMoldRow = moldRows[moldRows.length - 1];
-    lastMoldRow.querySelectorAll('select').forEach(function(el) {
-      el.removeEventListener('change', moldListener);
-      el.addEventListener('change', moldListener);
-    });
-  }
-
-  function materialListener() {
-    checkAndAddRow('materials-container', 'material-template');
-  }
-
-  function moldListener() {
-    checkAndAddRow('molds-container', 'mold-template');
-  }
-
-  attachListeners();
-});
-</script>
