@@ -31,21 +31,21 @@
            </div>
          </div>
       <% }); %>
-    <% } else { %>
-      <div class="form-row mb-2 dynamic-row">
-         <div class="col">
-           <select name="material_id" class="form-control">
-             <option value="">-- Material wählen --</option>
-             <% materials.forEach(mat => { %>
-               <option value="<%= mat.id %>"><%= mat.name %></option>
-             <% }); %>
-           </select>
-         </div>
-         <div class="col">
-           <input type="number" step="0.01" name="quantity" class="form-control" placeholder="Menge">
-         </div>
-      </div>
     <% } %>
+    <!-- Leere Zeile zur Eingabe -->
+    <div class="form-row mb-2 dynamic-row">
+       <div class="col">
+         <select name="material_id" class="form-control">
+           <option value="">-- Material wählen --</option>
+           <% materials.forEach(mat => { %>
+             <option value="<%= mat.id %>"><%= mat.name %></option>
+           <% }); %>
+         </select>
+       </div>
+       <div class="col">
+         <input type="number" step="0.01" name="quantity" class="form-control" placeholder="Menge">
+       </div>
+    </div>
   </div>
 
   <h3>Gießformen</h3>
@@ -71,26 +71,26 @@
            </div>
          </div>
       <% }); %>
-    <% } else { %>
-      <div class="form-row mb-2 dynamic-row">
-         <div class="col">
-           <select name="mold_id" class="form-control">
-             <option value="">-- Gießform wählen --</option>
-             <% molds.forEach(mold => { %>
-               <option value="<%= mold.id %>"><%= mold.name %></option>
-             <% }); %>
-           </select>
-         </div>
-         <div class="col">
-           <select name="mold_casting_powder_id" class="form-control">
-             <option value="">-- Gießpulver wählen --</option>
-             <% powders.forEach(powder => { %>
-               <option value="<%= powder.id %>"><%= powder.name %></option>
-             <% }); %>
-           </select>
-         </div>
-      </div>
     <% } %>
+    <!-- Leere Zeile zur Eingabe -->
+    <div class="form-row mb-2 dynamic-row">
+       <div class="col">
+         <select name="mold_id" class="form-control">
+           <option value="">-- Gießform wählen --</option>
+           <% molds.forEach(mold => { %>
+             <option value="<%= mold.id %>"><%= mold.name %></option>
+           <% }); %>
+         </select>
+       </div>
+       <div class="col">
+         <select name="mold_casting_powder_id" class="form-control">
+           <option value="">-- Gießpulver wählen --</option>
+           <% powders.forEach(powder => { %>
+             <option value="<%= powder.id %>"><%= powder.name %></option>
+           <% }); %>
+         </select>
+       </div>
+    </div>
   </div>
 
   <button type="submit" class="btn btn-success mt-3"><%= workpiece ? 'Werkstück aktualisieren' : 'Werkstück speichern' %></button>
@@ -141,6 +141,8 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
+  // Für beide Container wird geprüft, ob in der letzten Zeile bereits etwas eingegeben wurde.
+  // Wenn ja, wird automatisch eine neue Zeile eingefügt.
   function checkAndAddRow(containerId, templateId) {
     const container = document.getElementById(containerId);
     const rows = container.querySelectorAll('.dynamic-row');
