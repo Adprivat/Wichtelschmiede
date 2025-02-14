@@ -1,5 +1,10 @@
 <% layout('layout') %>
 <h1>Gießformen</h1>
+<!-- Suchformular -->
+<form action="/molds" method="get" class="mb-3">
+  <input type="text" name="q" class="form-control" placeholder="Suche Gießformen" value="<%= query ? query : '' %>">
+  <button type="submit" class="btn btn-primary mt-2">Suchen</button>
+</form>
 <a href="/molds/new" class="btn btn-primary mb-3">Neue Gießform anlegen</a>
 <table class="table table-bordered table-responsive">
   <thead>

@@ -1,5 +1,10 @@
 <% layout('layout') %>
 <h1>Gießpulver</h1>
+<!-- Suchformular -->
+<form action="/casting-powders" method="get" class="mb-3">
+  <input type="text" name="q" class="form-control" placeholder="Suche Gießpulver" value="<%= query ? query : '' %>">
+  <button type="submit" class="btn btn-primary mt-2">Suchen</button>
+</form>
 <a href="/casting-powders/new" class="btn btn-primary mb-3">Neues Gießpulver anlegen</a>
 <table class="table table-bordered table-responsive">
   <thead>

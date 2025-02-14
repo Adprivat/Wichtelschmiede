@@ -6,6 +6,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const { sequelize, Material, CastingPowder, Mold, WorkPiece, WorkPieceMaterial, WorkPieceMold } = require('./models');
 const { stringify } = require('csv-stringify');
+const { Op } = require('sequelize');  // Für die Suche
 
 const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
@@ -13,6 +14,7 @@ const app = express();
 // EJS-Mate als Engine verwenden
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
+// Hinweis: In deiner layout.ejs kannst du nun den App-Namen z.B. "Wichtelschmiede Hofgeismar" setzen
 app.set('views', path.join(__dirname, 'views'));
 
 // Statische Dateien aus dem Ordner "public" bereitstellen
@@ -26,22 +28,22 @@ app.get('/', (req, res) => {
 
 // ---------- Materialien ----------
 
-// Liste aller Materialien
 app.get('/materials', async (req, res) => {
   try {
-    const materials = await Material.findAll();
-    res.render('materials', { materials });
+    const query = req.query.q || '';
+    const materials = query 
+      ? await Material.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
+      : await Material.findAll();
+    res.render('materials', { materials, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Materialien: " + err);
   }
 });
 
-// Formular zum Anlegen eines neuen Materials
 app.get('/materials/new', (req, res) => {
   res.render('material_form', { material: null });
 });
 
-// Neuen Material-Eintrag erstellen
 app.post('/materials/new', upload.single('image'), async (req, res) => {
   try {
     await Material.create({
@@ -57,7 +59,6 @@ app.post('/materials/new', upload.single('image'), async (req, res) => {
   }
 });
 
-// Formular zum Bearbeiten eines Materials
 app.get('/materials/:id/edit', async (req, res) => {
   try {
     const material = await Material.findByPk(req.params.id);
@@ -68,7 +69,6 @@ app.get('/materials/:id/edit', async (req, res) => {
   }
 });
 
-// Material aktualisieren
 app.post('/materials/:id/edit', upload.single('image'), async (req, res) => {
   try {
     const material = await Material.findByPk(req.params.id);
@@ -87,7 +87,6 @@ app.post('/materials/:id/edit', upload.single('image'), async (req, res) => {
   }
 });
 
-// Löschen eines Materials
 app.post('/materials/:id/delete', async (req, res) => {
   try {
     const material = await Material.findByPk(req.params.id);
@@ -99,7 +98,6 @@ app.post('/materials/:id/delete', async (req, res) => {
   }
 });
 
-// Export der Materialien als CSV
 app.get('/materials/export', async (req, res) => {
   try {
     const materials = await Material.findAll();
@@ -120,22 +118,22 @@ app.get('/materials/export', async (req, res) => {
 
 // ---------- Gießpulver ----------
 
-// Liste aller Gießpulver
 app.get('/casting-powders', async (req, res) => {
   try {
-    const powders = await CastingPowder.findAll();
-    res.render('casting_powders', { powders });
+    const query = req.query.q || '';
+    const powders = query 
+      ? await CastingPowder.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
+      : await CastingPowder.findAll();
+    res.render('casting_powders', { powders, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Gießpulver: " + err);
   }
 });
 
-// Formular zum Anlegen eines neuen Gießpulvers
 app.get('/casting-powders/new', (req, res) => {
   res.render('casting_powder_form', { powder: null });
 });
 
-// Neuen CastingPowder erstellen
 app.post('/casting-powders/new', async (req, res) => {
   try {
     await CastingPowder.create({
@@ -150,7 +148,6 @@ app.post('/casting-powders/new', async (req, res) => {
   }
 });
 
-// Formular zum Bearbeiten eines Gießpulvers
 app.get('/casting-powders/:id/edit', async (req, res) => {
   try {
     const powder = await CastingPowder.findByPk(req.params.id);
@@ -161,7 +158,6 @@ app.get('/casting-powders/:id/edit', async (req, res) => {
   }
 });
 
-// CastingPowder aktualisieren
 app.post('/casting-powders/:id/edit', async (req, res) => {
   try {
     const powder = await CastingPowder.findByPk(req.params.id);
@@ -177,7 +173,6 @@ app.post('/casting-powders/:id/edit', async (req, res) => {
   }
 });
 
-// Löschen eines Gießpulvers
 app.post('/casting-powders/:id/delete', async (req, res) => {
   try {
     const powder = await CastingPowder.findByPk(req.params.id);
@@ -191,23 +186,23 @@ app.post('/casting-powders/:id/delete', async (req, res) => {
 
 // ---------- Gießformen ----------
 
-// GET: Liste aller Gießformen inkl. CastingPowder-Daten für das Dropdown
 app.get('/molds', async (req, res) => {
   try {
-    const molds = await Mold.findAll();
+    const query = req.query.q || '';
+    const molds = query 
+      ? await Mold.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
+      : await Mold.findAll();
     const powders = await CastingPowder.findAll();
-    res.render('molds', { molds, powders });
+    res.render('molds', { molds, powders, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Gießformen: " + err);
   }
 });
 
-// Formular zum Anlegen einer neuen Gießform
 app.get('/molds/new', (req, res) => {
   res.render('mold_form', { mold: null });
 });
 
-// Neue Gießform erstellen
 app.post('/molds/new', upload.single('image'), async (req, res) => {
   try {
     await Mold.create({
@@ -221,7 +216,6 @@ app.post('/molds/new', upload.single('image'), async (req, res) => {
   }
 });
 
-// Formular zum Bearbeiten einer Gießform
 app.get('/molds/:id/edit', async (req, res) => {
   try {
     const mold = await Mold.findByPk(req.params.id);
@@ -232,7 +226,6 @@ app.get('/molds/:id/edit', async (req, res) => {
   }
 });
 
-// Gießform aktualisieren
 app.post('/molds/:id/edit', upload.single('image'), async (req, res) => {
   try {
     const mold = await Mold.findByPk(req.params.id);
@@ -249,7 +242,6 @@ app.post('/molds/:id/edit', upload.single('image'), async (req, res) => {
   }
 });
 
-// Löschen einer Gießform
 app.post('/molds/:id/delete', async (req, res) => {
   try {
     const mold = await Mold.findByPk(req.params.id);
@@ -261,7 +253,6 @@ app.post('/molds/:id/delete', async (req, res) => {
   }
 });
 
-// POST: Berechnung der Herstellungskosten – läuft auf derselben Seite
 app.post('/molds/calculate', async (req, res) => {
   try {
     const { mold_id, casting_powder_id } = req.body;
@@ -277,7 +268,6 @@ app.post('/molds/calculate', async (req, res) => {
     const water_amount = fill_volume * (water_ratio / total_ratio);
     const cost = powder_amount * parseFloat(powder.price_per_gram);
 
-    // Nach der Berechnung laden wir erneut alle Gießformen und Gießpulver
     const molds = await Mold.findAll();
     const powders = await CastingPowder.findAll();
     res.render('molds', { molds, powders, calc: { mold, powder, powder_amount, water_amount, cost } });
@@ -286,7 +276,6 @@ app.post('/molds/calculate', async (req, res) => {
   }
 });
 
-// Route zum Abrufen des Bildes einer Gießform
 app.get('/image/mold/:id', async (req, res) => {
   try {
     const mold = await Mold.findByPk(req.params.id);
@@ -303,17 +292,18 @@ app.get('/image/mold/:id', async (req, res) => {
 
 // ---------- Werkstücke ----------
 
-// Liste aller Werkstücke (Listenansicht)
 app.get('/workpieces', async (req, res) => {
   try {
-    const workpieces = await WorkPiece.findAll();
-    res.render('workpieces', { workpieces, detail: false });
+    const query = req.query.q || '';
+    const workpieces = query 
+      ? await WorkPiece.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
+      : await WorkPiece.findAll();
+    res.render('workpieces', { workpieces, detail: false, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Werkstücke: " + err);
   }
 });
 
-// Formular zum Anlegen eines neuen Werkstücks
 app.get('/workpieces/new', async (req, res) => {
   try {
     const materials = await Material.findAll();
@@ -325,7 +315,6 @@ app.get('/workpieces/new', async (req, res) => {
   }
 });
 
-// Neues Werkstück erstellen (inkl. Zuordnung von Materialien und Gießformen)
 app.post('/workpieces/new', upload.single('image'), async (req, res) => {
   try {
     const workpiece = await WorkPiece.create({
@@ -333,7 +322,6 @@ app.post('/workpieces/new', upload.single('image'), async (req, res) => {
       image: req.file ? req.file.buffer : null
     });
 
-    // Materialien: Arrays mit material_id[] und quantity[] verarbeiten
     if (req.body.material_id && req.body.quantity) {
       const materialIds = Array.isArray(req.body.material_id) ? req.body.material_id : [req.body.material_id];
       const quantities = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
@@ -344,7 +332,6 @@ app.post('/workpieces/new', upload.single('image'), async (req, res) => {
       }
     }
 
-    // Gießformen: Arrays mit mold_id[] und mold_casting_powder_id[] verarbeiten
     if (req.body.mold_id && req.body.mold_casting_powder_id) {
       const moldIds = Array.isArray(req.body.mold_id) ? req.body.mold_id : [req.body.mold_id];
       const powderIds = Array.isArray(req.body.mold_casting_powder_id) ? req.body.mold_casting_powder_id : [req.body.mold_casting_powder_id];
@@ -360,7 +347,6 @@ app.post('/workpieces/new', upload.single('image'), async (req, res) => {
   }
 });
 
-// GET: Formular zum Bearbeiten eines bestehenden Werkstücks
 app.get('/workpieces/:id/edit', async (req, res) => {
   try {
     const workpiece = await WorkPiece.findByPk(req.params.id, {
@@ -379,7 +365,6 @@ app.get('/workpieces/:id/edit', async (req, res) => {
   }
 });
 
-// POST: Aktualisierung eines bestehenden Werkstücks
 app.post('/workpieces/:id/edit', upload.single('image'), async (req, res) => {
   try {
     const workpiece = await WorkPiece.findByPk(req.params.id);
@@ -390,8 +375,7 @@ app.post('/workpieces/:id/edit', upload.single('image'), async (req, res) => {
     }
     await workpiece.save();
 
-    // Materialien aktualisieren
-    await workpiece.setMaterials([]); // Alte Zuordnungen entfernen
+    await workpiece.setMaterials([]);
     if (req.body.material_id && req.body.quantity) {
       const materialIds = Array.isArray(req.body.material_id) ? req.body.material_id : [req.body.material_id];
       const quantities = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
@@ -402,8 +386,7 @@ app.post('/workpieces/:id/edit', upload.single('image'), async (req, res) => {
       }
     }
 
-    // Gießformen aktualisieren
-    await workpiece.setMolds([]); // Alte Zuordnungen entfernen
+    await workpiece.setMolds([]);
     if (req.body.mold_id && req.body.mold_casting_powder_id) {
       const moldIds = Array.isArray(req.body.mold_id) ? req.body.mold_id : [req.body.mold_id];
       const powderIds = Array.isArray(req.body.mold_casting_powder_id) ? req.body.mold_casting_powder_id : [req.body.mold_casting_powder_id];
@@ -419,7 +402,6 @@ app.post('/workpieces/:id/edit', upload.single('image'), async (req, res) => {
   }
 });
 
-// POST: Lösch-Route für Werkstücke
 app.post('/workpieces/:id/delete', async (req, res) => {
   try {
     const workpiece = await WorkPiece.findByPk(req.params.id);
@@ -431,7 +413,6 @@ app.post('/workpieces/:id/delete', async (req, res) => {
   }
 });
 
-// GET: Detailansicht eines Werkstücks
 app.get('/workpieces/:id', async (req, res) => {
   try {
     const workpiece = await WorkPiece.findByPk(req.params.id, {
@@ -442,14 +423,12 @@ app.get('/workpieces/:id', async (req, res) => {
     });
     if (!workpiece) return res.status(404).send("Werkstück nicht gefunden");
 
-    // Berechnung der Kosten aus Materialien
     let materialCost = 0;
     for (const material of workpiece.Materials) {
       const qty = material.WorkPieceMaterial.quantity;
       materialCost += material.unit_price * qty;
     }
 
-    // Berechnung der Kosten aus Gießformen
     let moldCost = 0;
     const powders = await CastingPowder.findAll();
     for (const mold of workpiece.Molds) {
@@ -473,7 +452,6 @@ app.get('/workpieces/:id', async (req, res) => {
   }
 });
 
-// Export der Werkstücke als CSV (nur Basisdaten)
 app.get('/workpieces/export', async (req, res) => {
   try {
     const workpieces = await WorkPiece.findAll();
@@ -489,7 +467,6 @@ app.get('/workpieces/export', async (req, res) => {
   }
 });
 
-// Route zum Abrufen des Bildes eines Werkstücks
 app.get('/image/workpiece/:id', async (req, res) => {
   try {
     const wp = await WorkPiece.findByPk(req.params.id);
@@ -504,7 +481,6 @@ app.get('/image/workpiece/:id', async (req, res) => {
   }
 });
 
-// Route zum Abrufen des Bildes eines Materials
 app.get('/image/material/:id', async (req, res) => {
   try {
     const material = await Material.findByPk(req.params.id);

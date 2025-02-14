@@ -20,10 +20,7 @@
         <%= mold.name %> – Füllmenge: <%= mold.fill_volume %>;
         Verwendetes Gießpulver: 
         <% if(mold.WorkPieceMold && mold.WorkPieceMold.CastingPowderId) { %>
-          <% 
-            // Suche in powders das Gießpulver mit der hinterlegten ID
-            var usedPowder = powders.find(p => p.id === mold.WorkPieceMold.CastingPowderId);
-          %>
+          <% var usedPowder = powders.find(p => p.id === mold.WorkPieceMold.CastingPowderId); %>
           <%= usedPowder ? usedPowder.name : 'unbekannt' %>
         <% } else { %>
           nicht ausgewählt
@@ -34,7 +31,13 @@
   <a href="/workpieces" class="btn btn-secondary">Zurück zur Übersicht</a>
 <% } else { %>
   <h1>Werkstücke</h1>
+  <!-- Suchformular -->
+  <form action="/workpieces" method="get" class="mb-3">
+    <input type="text" name="q" class="form-control" placeholder="Suche Werkstücke" value="<%= query ? query : '' %>">
+    <button type="submit" class="btn btn-primary mt-2">Suchen</button>
+  </form>
   <a href="/workpieces/new" class="btn btn-primary mb-3">Neues Werkstück anlegen</a>
+  <a href="/workpieces/export" class="btn btn-secondary mb-3">CSV Export</a>
   <table class="table table-bordered table-responsive">
     <thead>
       <tr>
