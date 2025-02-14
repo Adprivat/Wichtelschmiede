@@ -27,6 +27,9 @@
           <td><%= powder.price_per_gram %></td>
           <td>
             <a href="/casting-powders/<%= powder.id %>/edit" class="btn btn-sm btn-warning">Bearbeiten</a>
+            <form action="/casting-powders/<%= powder.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('Soll das Gießpulver wirklich gelöscht werden?');">
+              <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
+            </form>
           </td>
         </tr>
       <% }); %>

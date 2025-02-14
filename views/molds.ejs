@@ -26,13 +26,16 @@
         </td>
         <td>
           <a href="/molds/<%= mold.id %>/edit" class="btn btn-sm btn-warning">Bearbeiten</a>
+          <form action="/molds/<%= mold.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('Soll die Gießform wirklich gelöscht werden?');">
+            <button type="submit" class="btn btn-sm btn-danger">Löschen</button>
+          </form>
         </td>
       </tr>
     <% }); %>
   </tbody>
 </table>
 
-<!-- Formular zur Berechnung -->
+<!-- Formular zur Berechnung der Herstellungskosten -->
 <h2>Herstellungskosten berechnen</h2>
 <form action="/molds/calculate" method="post" class="form-inline">
   <div class="form-group mb-2">

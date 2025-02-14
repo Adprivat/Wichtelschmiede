@@ -13,7 +13,6 @@ const app = express();
 // EJS-Mate als Engine verwenden
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
-// In der layout.ejs sollte im <title> "Wichtelschmiede Hofgeismar" stehen
 app.set('views', path.join(__dirname, 'views'));
 
 // Statische Dateien aus dem Ordner "public" bereitstellen
@@ -85,6 +84,18 @@ app.post('/materials/:id/edit', upload.single('image'), async (req, res) => {
     res.redirect('/materials');
   } catch (err) {
     res.status(500).send("Fehler beim Aktualisieren des Materials: " + err);
+  }
+});
+
+// Löschen eines Materials
+app.post('/materials/:id/delete', async (req, res) => {
+  try {
+    const material = await Material.findByPk(req.params.id);
+    if (!material) return res.status(404).send("Material nicht gefunden");
+    await material.destroy();
+    res.redirect('/materials');
+  } catch (err) {
+    res.status(500).send("Fehler beim Löschen des Materials: " + err);
   }
 });
 
@@ -166,6 +177,18 @@ app.post('/casting-powders/:id/edit', async (req, res) => {
   }
 });
 
+// Löschen eines Gießpulvers
+app.post('/casting-powders/:id/delete', async (req, res) => {
+  try {
+    const powder = await CastingPowder.findByPk(req.params.id);
+    if (!powder) return res.status(404).send("Gießpulver nicht gefunden");
+    await powder.destroy();
+    res.redirect('/casting-powders');
+  } catch (err) {
+    res.status(500).send("Fehler beim Löschen des Gießpulvers: " + err);
+  }
+});
+
 // ---------- Gießformen ----------
 
 // GET: Liste aller Gießformen inkl. CastingPowder-Daten für das Dropdown
@@ -223,6 +246,18 @@ app.post('/molds/:id/edit', upload.single('image'), async (req, res) => {
     res.redirect('/molds');
   } catch (err) {
     res.status(500).send("Fehler beim Aktualisieren der Gießform: " + err);
+  }
+});
+
+// Löschen einer Gießform
+app.post('/molds/:id/delete', async (req, res) => {
+  try {
+    const mold = await Mold.findByPk(req.params.id);
+    if (!mold) return res.status(404).send("Gießform nicht gefunden");
+    await mold.destroy();
+    res.redirect('/molds');
+  } catch (err) {
+    res.status(500).send("Fehler beim Löschen der Gießform: " + err);
   }
 });
 
@@ -416,10 +451,8 @@ app.get('/workpieces/:id', async (req, res) => {
 
     // Berechnung der Kosten aus Gießformen
     let moldCost = 0;
-    // Wir laden zunächst alle CastingPowder-Daten
     const powders = await CastingPowder.findAll();
     for (const mold of workpiece.Molds) {
-      // Falls in der Through-Tabelle ein CastingPowderId gespeichert ist
       if (mold.WorkPieceMold && mold.WorkPieceMold.CastingPowderId) {
         const powder = powders.find(p => p.id === mold.WorkPieceMold.CastingPowderId);
         if (powder) {
