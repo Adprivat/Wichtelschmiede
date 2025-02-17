@@ -1,11 +1,14 @@
 <% layout('layout') %>
 <h1>Gießpulver</h1>
+
 <!-- Suchformular -->
 <form action="/casting-powders" method="get" class="mb-3">
   <input type="text" name="q" class="form-control" placeholder="Suche Gießpulver" value="<%= query ? query : '' %>">
   <button type="submit" class="btn btn-primary mt-2">Suchen</button>
 </form>
+
 <a href="/casting-powders/new" class="btn btn-primary mb-3">Neues Gießpulver anlegen</a>
+
 <table class="table table-bordered table-responsive">
   <thead>
     <tr>
@@ -13,7 +16,7 @@
       <th>Name</th>
       <th>Wasseranteil</th>
       <th>Pulveranteil</th>
-      <th>Preis pro Gramm</th>
+      <th>Preis pro Gramm (in €)</th>
       <th>Aktionen</th>
     </tr>
   </thead>
@@ -29,7 +32,7 @@
           <td><%= powder.name %></td>
           <td><%= powder.water_ratio %></td>
           <td><%= powder.powder_ratio %></td>
-          <td><%= powder.price_per_gram %></td>
+          <td><%= Number(powder.price_per_gram).toFixed(4) %></td>
           <td>
             <a href="/casting-powders/<%= powder.id %>/edit" class="btn btn-sm btn-warning">Bearbeiten</a>
             <form action="/casting-powders/<%= powder.id %>/delete" method="post" style="display:inline;" onsubmit="return confirm('Soll das Gießpulver wirklich gelöscht werden?');">
