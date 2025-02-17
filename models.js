@@ -2,10 +2,9 @@
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Verbindung: Nutzt die Umgebungsvariable DATABASE_URL, falls vorhanden, ansonsten den Standardwert.
-const sequelize = new Sequelize(
-  process.env.DATABASE_URL || 'mysql://user:password@localhost:3306/kunsthandwerk',
-  { dialect: 'mariadb' }
-);
+const sequelize = new Sequelize(process.env.DATABASE_URL || 'mysql://root:mTKyNduzzxzUNCfqwhfqnUioAUlzNnXv@viaduct.proxy.rlwy.net:43038/railway', {
+  dialect: 'mariadb'
+});
 
 // Material – speichert Name, Bezugsquelle, Preis, Preis pro Einheit und optional ein Bild
 const Material = sequelize.define('Material', {
