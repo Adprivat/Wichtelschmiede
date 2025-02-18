@@ -4,7 +4,6 @@ const engine = require('ejs-mate'); // ejs-mate einbinden
 const multer = require('multer');
 const path = require('path');
 const bodyParser = require('body-parser');
-const basicAuth = require('express-basic-auth');
 const { sequelize, Material, CastingPowder, Mold, WorkPiece, WorkPieceMaterial, WorkPieceMold } = require('./models');
 const { stringify } = require('csv-stringify');
 const { Op } = require('sequelize');
@@ -12,26 +11,12 @@ const { Op } = require('sequelize');
 const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
 
-// Prüfe, ob die benötigten Umgebungsvariablen gesetzt sind
-if (!process.env.BASIC_AUTH_USER || !process.env.BASIC_AUTH_PASSWORD) {
-  console.error("ERROR: BASIC_AUTH_USER und BASIC_AUTH_PASSWORD müssen als Umgebungsvariablen gesetzt sein!");
-  process.exit(1);
-}
-
-// Globaler Passwortschutz – die Zugangsdaten werden aus den Umgebungsvariablen gelesen.
-app.use(basicAuth({
-  users: { [process.env.BASIC_AUTH_USER]: process.env.BASIC_AUTH_PASSWORD },
-  challenge: true,
-  unauthorizedResponse: 'Nicht autorisiert.'
-}));
-
 // EJS-Mate als Engine verwenden
 app.engine('ejs', engine);
 app.set('view engine', 'ejs');
-// In der layout.ejs kannst du im <title> z.B. "Wichtelschmiede Hofgeismar" eintragen
+// Passe ggf. den Titel in deiner layout.ejs an (z.B. "Wichtelschmiede Hofgeismar")
 app.set('views', path.join(__dirname, 'views'));
 
-// Statische Dateien aus dem Ordner "public" bereitstellen
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -336,6 +321,7 @@ app.post('/workpieces/new', upload.single('image'), async (req, res) => {
       image: req.file ? req.file.buffer : null
     });
 
+    // Materialien verarbeiten
     if (req.body.material_id && req.body.quantity) {
       const materialIds = Array.isArray(req.body.material_id) ? req.body.material_id : [req.body.material_id];
       const quantities = Array.isArray(req.body.quantity) ? req.body.quantity : [req.body.quantity];
@@ -346,12 +332,14 @@ app.post('/workpieces/new', upload.single('image'), async (req, res) => {
       }
     }
 
-    if (req.body.mold_id && req.body.mold_casting_powder_id) {
+    // Gießformen verarbeiten – hier wird auch mold_quantity erwartet
+    if (req.body.mold_id && req.body.mold_casting_powder_id && req.body.mold_quantity) {
       const moldIds = Array.isArray(req.body.mold_id) ? req.body.mold_id : [req.body.mold_id];
       const powderIds = Array.isArray(req.body.mold_casting_powder_id) ? req.body.mold_casting_powder_id : [req.body.mold_casting_powder_id];
+      const moldQuantities = Array.isArray(req.body.mold_quantity) ? req.body.mold_quantity : [req.body.mold_quantity];
       for (let i = 0; i < moldIds.length; i++) {
-        if (moldIds[i] && powderIds[i]) {
-          await workpiece.addMold(moldIds[i], { through: { CastingPowderId: powderIds[i] } });
+        if (moldIds[i] && powderIds[i] && moldQuantities[i]) {
+          await workpiece.addMold(moldIds[i], { through: { CastingPowderId: powderIds[i], quantity: moldQuantities[i] } });
         }
       }
     }
@@ -366,7 +354,7 @@ app.get('/workpieces/:id/edit', async (req, res) => {
     const workpiece = await WorkPiece.findByPk(req.params.id, {
       include: [
         { model: Material },
-        { model: Mold, through: { attributes: ['CastingPowderId'] } }
+        { model: Mold, through: { attributes: ['CastingPowderId', 'quantity'] } }
       ]
     });
     if (!workpiece) return res.status(404).send("Werkstück nicht gefunden");
@@ -389,6 +377,7 @@ app.post('/workpieces/:id/edit', upload.single('image'), async (req, res) => {
     }
     await workpiece.save();
 
+    // Materialien aktualisieren
     await workpiece.setMaterials([]);
     if (req.body.material_id && req.body.quantity) {
       const materialIds = Array.isArray(req.body.material_id) ? req.body.material_id : [req.body.material_id];
@@ -400,13 +389,15 @@ app.post('/workpieces/:id/edit', upload.single('image'), async (req, res) => {
       }
     }
 
+    // Gießformen aktualisieren
     await workpiece.setMolds([]);
-    if (req.body.mold_id && req.body.mold_casting_powder_id) {
+    if (req.body.mold_id && req.body.mold_casting_powder_id && req.body.mold_quantity) {
       const moldIds = Array.isArray(req.body.mold_id) ? req.body.mold_id : [req.body.mold_id];
       const powderIds = Array.isArray(req.body.mold_casting_powder_id) ? req.body.mold_casting_powder_id : [req.body.mold_casting_powder_id];
+      const moldQuantities = Array.isArray(req.body.mold_quantity) ? req.body.mold_quantity : [req.body.mold_quantity];
       for (let i = 0; i < moldIds.length; i++) {
-        if (moldIds[i] && powderIds[i]) {
-          await workpiece.addMold(moldIds[i], { through: { CastingPowderId: powderIds[i] } });
+        if (moldIds[i] && powderIds[i] && moldQuantities[i]) {
+          await workpiece.addMold(moldIds[i], { through: { CastingPowderId: powderIds[i], quantity: moldQuantities[i] } });
         }
       }
     }
@@ -432,7 +423,7 @@ app.get('/workpieces/:id', async (req, res) => {
     const workpiece = await WorkPiece.findByPk(req.params.id, {
       include: [
         { model: Material },
-        { model: Mold, through: { attributes: ['CastingPowderId'] } }
+        { model: Mold, through: { attributes: ['CastingPowderId', 'quantity'] } }
       ]
     });
     if (!workpiece) return res.status(404).send("Werkstück nicht gefunden");
@@ -446,16 +437,18 @@ app.get('/workpieces/:id', async (req, res) => {
     let moldCost = 0;
     const powders = await CastingPowder.findAll();
     for (const mold of workpiece.Molds) {
-      if (mold.WorkPieceMold && mold.WorkPieceMold.CastingPowderId) {
-        const powder = powders.find(p => p.id === mold.WorkPieceMold.CastingPowderId);
+      const pivot = mold.WorkPieceMold;
+      const quantity = pivot.quantity || 1;
+      if (pivot.CastingPowderId) {
+        const powder = powders.find(p => p.id === pivot.CastingPowderId);
         if (powder) {
           const water_ratio = parseFloat(powder.water_ratio);
           const powder_ratio = parseFloat(powder.powder_ratio);
           const fill_volume = parseFloat(mold.fill_volume);
           const total_ratio = water_ratio + powder_ratio;
           const powder_amount = fill_volume * (powder_ratio / total_ratio);
-          const cost_mold = powder_amount * parseFloat(powder.price_per_gram);
-          moldCost += cost_mold;
+          const cost_for_one = powder_amount * parseFloat(powder.price_per_gram);
+          moldCost += cost_for_one * quantity;
         }
       }
     }
@@ -509,7 +502,6 @@ app.get('/image/material/:id', async (req, res) => {
   }
 });
 
-// Sync DB und Serverstart
 sequelize.sync().then(() => {
   const port = process.env.PORT || 3000;
   app.listen(port, () => console.log(`Server läuft auf Port ${port}`));
