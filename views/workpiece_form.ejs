@@ -69,6 +69,12 @@
                <% }); %>
              </select>
            </div>
+           <div class="col">
+             <!-- Feld für Menge, wie oft diese Gießform verwendet wird -->
+             <input type="number" step="1" min="1" name="mold_quantity" class="form-control"
+                    value="<%= mold.WorkPieceMold && mold.WorkPieceMold.quantity ? mold.WorkPieceMold.quantity : 1 %>"
+                    placeholder="Anzahl">
+           </div>
          </div>
       <% }); %>
     <% } %>
@@ -89,6 +95,10 @@
              <option value="<%= powder.id %>"><%= powder.name %></option>
            <% }); %>
          </select>
+       </div>
+       <div class="col">
+         <input type="number" step="1" min="1" name="mold_quantity" class="form-control"
+                value="1" placeholder="Anzahl">
        </div>
     </div>
   </div>
@@ -136,13 +146,14 @@
         <% }); %>
       </select>
     </div>
+    <div class="col">
+      <input type="number" step="1" min="1" name="mold_quantity" class="form-control" placeholder="Anzahl" value="1">
+    </div>
   </div>
 </template>
 
 <script>
 document.addEventListener('DOMContentLoaded', function(){
-  // Für beide Container wird geprüft, ob in der letzten Zeile bereits etwas eingegeben wurde.
-  // Wenn ja, wird automatisch eine neue Zeile eingefügt.
   function checkAndAddRow(containerId, templateId) {
     const container = document.getElementById(containerId);
     const rows = container.querySelectorAll('.dynamic-row');
