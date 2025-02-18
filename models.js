@@ -3,7 +3,7 @@ const { Sequelize, DataTypes } = require('sequelize');
 
 // Verbindung: Nutze die Umgebungsvariable DATABASE_URL, falls vorhanden, ansonsten den Standardwert.
 const sequelize = new Sequelize(
-  process.env.DATABASE_URL || 'mysql://user:password@localhost:3306/kunsthandwerk',
+  process.env.DATABASE_URL || 'mysql://root:mTKyNduzzxzUNCfqwhfqnUioAUlzNnXv@viaduct.proxy.rlwy.net:43038/railway',
   { dialect: 'mariadb' }
 );
 
