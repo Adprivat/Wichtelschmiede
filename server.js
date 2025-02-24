@@ -262,9 +262,10 @@ app.post('/molds/calculate', async (req, res) => {
     const water_ratio = parseFloat(powder.water_ratio);
     const powder_ratio = parseFloat(powder.powder_ratio);
     const fill_volume = parseFloat(mold.fill_volume);
-    const total_ratio = water_ratio + powder_ratio;
-    const powder_amount = fill_volume * (powder_ratio / total_ratio);
-    const water_amount = fill_volume * (water_ratio / total_ratio);
+    
+    // Neue Berechnungsmethode:
+    const water_amount = fill_volume / 2;
+    const powder_amount = water_amount * (powder_ratio / water_ratio);
     const cost = powder_amount * parseFloat(powder.price_per_gram);
 
     const molds = await Mold.findAll();
@@ -445,8 +446,10 @@ app.get('/workpieces/:id', async (req, res) => {
           const water_ratio = parseFloat(powder.water_ratio);
           const powder_ratio = parseFloat(powder.powder_ratio);
           const fill_volume = parseFloat(mold.fill_volume);
-          const total_ratio = water_ratio + powder_ratio;
-          const powder_amount = fill_volume * (powder_ratio / total_ratio);
+          
+          // Neue Berechnungsmethode:
+          const water_amount = fill_volume / 2;
+          const powder_amount = water_amount * (powder_ratio / water_ratio);
           const cost_for_one = powder_amount * parseFloat(powder.price_per_gram);
           moldCost += cost_for_one * quantity;
         }
