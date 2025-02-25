@@ -1,4 +1,4 @@
-// models.js
+// models.js Testlauf
 const { Sequelize, DataTypes } = require('sequelize');
 
 // Verbindung: Nutze die Umgebungsvariable DATABASE_URL, falls vorhanden, ansonsten den Standardwert.
