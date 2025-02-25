@@ -7,9 +7,27 @@ const bodyParser = require('body-parser');
 const { sequelize, Material, CastingPowder, Mold, WorkPiece, WorkPieceMaterial, WorkPieceMold } = require('./models');
 const { stringify } = require('csv-stringify');
 const { Op } = require('sequelize');
+const basicAuth = require('express-basic-auth');
 
 const upload = multer({ storage: multer.memoryStorage() });
 const app = express();
+
+// Basic Authentication mit sicherer Umgebungsvariablenprüfung
+if (!process.env.BASIC_AUTH_USER || !process.env.BASIC_AUTH_PASSWORD) {
+  console.error('WARNUNG: Umgebungsvariablen BASIC_AUTH_USER und/oder BASIC_AUTH_PASSWORD fehlen!');
+  console.error('Die Anwendung wird ohne Passwortschutz gestartet.');
+} else {
+  const users = {};
+  users[process.env.BASIC_AUTH_USER] = process.env.BASIC_AUTH_PASSWORD;
+  
+  app.use(basicAuth({
+    users: users,
+    challenge: true,
+    realm: 'Wichtelschmiede Hofgeismar',
+    unauthorizedResponse: 'Unbefugter Zugriff verweigert'
+  }));
+  console.log('Passwortschutz wurde aktiviert.');
+}
 
 // EJS-Mate als Engine verwenden
 app.engine('ejs', engine);
