@@ -49,8 +49,8 @@ app.get('/materials', async (req, res) => {
   try {
     const query = req.query.q || '';
     const materials = query 
-      ? await Material.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
-      : await Material.findAll();
+      ? await Material.findAll({ where: { name: { [Op.like]: `%${query}%` } }, order: [['name', 'ASC']] })
+      : await Material.findAll({ order: [['name', 'ASC']] });
     res.render('materials', { materials, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Materialien: " + err);
@@ -139,8 +139,8 @@ app.get('/casting-powders', async (req, res) => {
   try {
     const query = req.query.q || '';
     const powders = query 
-      ? await CastingPowder.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
-      : await CastingPowder.findAll();
+      ? await CastingPowder.findAll({ where: { name: { [Op.like]: `%${query}%` } }, order: [['name', 'ASC']] })
+      : await CastingPowder.findAll({ order: [['name', 'ASC']] });
     res.render('casting_powders', { powders, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Gießpulver: " + err);
@@ -207,9 +207,9 @@ app.get('/molds', async (req, res) => {
   try {
     const query = req.query.q || '';
     const molds = query 
-      ? await Mold.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
-      : await Mold.findAll();
-    const powders = await CastingPowder.findAll();
+      ? await Mold.findAll({ where: { name: { [Op.like]: `%${query}%` } }, order: [['name', 'ASC']] })
+      : await Mold.findAll({ order: [['name', 'ASC']] });
+    const powders = await CastingPowder.findAll({ order: [['name', 'ASC']] });
     res.render('molds', { molds, powders, query });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Gießformen: " + err);
@@ -286,8 +286,8 @@ app.post('/molds/calculate', async (req, res) => {
     const powder_amount = water_amount * (powder_ratio / water_ratio);
     const cost = powder_amount * parseFloat(powder.price_per_gram);
 
-    const molds = await Mold.findAll();
-    const powders = await CastingPowder.findAll();
+    const molds = await Mold.findAll({ order: [['name', 'ASC']] });
+    const powders = await CastingPowder.findAll({ order: [['name', 'ASC']] });
     res.render('molds', { molds, powders, calc: { mold, powder, powder_amount, water_amount, cost } });
   } catch (err) {
     res.status(500).send("Fehler bei der Berechnung: " + err);
@@ -314,9 +314,9 @@ app.get('/workpieces', async (req, res) => {
   try {
     const query = req.query.q || '';
     const workpieces = query 
-      ? await WorkPiece.findAll({ where: { name: { [Op.like]: `%${query}%` } } })
-      : await WorkPiece.findAll();
-    res.render('workpieces', { workpieces, detail: false, query });
+      ? await WorkPiece.findAll({ where: { name: { [Op.like]: `%${query}%` } }, order: [['name', 'ASC']] })
+      : await WorkPiece.findAll({ order: [['name', 'ASC']] });
+    res.render('workpieces', { workpieces, query, detail: false });
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen der Werkstücke: " + err);
   }
@@ -324,9 +324,9 @@ app.get('/workpieces', async (req, res) => {
 
 app.get('/workpieces/new', async (req, res) => {
   try {
-    const materials = await Material.findAll();
-    const molds = await Mold.findAll();
-    const powders = await CastingPowder.findAll();
+    const materials = await Material.findAll({ order: [['name', 'ASC']] });
+    const molds = await Mold.findAll({ order: [['name', 'ASC']] });
+    const powders = await CastingPowder.findAll({ order: [['name', 'ASC']] });
     res.render('workpiece_form', { workpiece: null, materials, molds, powders });
   } catch (err) {
     res.status(500).send("Fehler beim Laden des Formulars: " + err);
@@ -376,13 +376,12 @@ app.get('/workpieces/:id/edit', async (req, res) => {
         { model: Mold, through: { attributes: ['CastingPowderId', 'quantity'] } }
       ]
     });
-    if (!workpiece) return res.status(404).send("Werkstück nicht gefunden");
-    const materials = await Material.findAll();
-    const molds = await Mold.findAll();
-    const powders = await CastingPowder.findAll();
+    const materials = await Material.findAll({ order: [['name', 'ASC']] });
+    const molds = await Mold.findAll({ order: [['name', 'ASC']] });
+    const powders = await CastingPowder.findAll({ order: [['name', 'ASC']] });
     res.render('workpiece_form', { workpiece, materials, molds, powders });
   } catch (err) {
-    res.status(500).send("Fehler beim Laden des Werkstücks: " + err);
+    res.status(500).send("Fehler beim Laden des Formulars: " + err);
   }
 });
 
@@ -454,7 +453,7 @@ app.get('/workpieces/:id', async (req, res) => {
     }
 
     let moldCost = 0;
-    const powders = await CastingPowder.findAll();
+    const powders = await CastingPowder.findAll({ order: [['name', 'ASC']] });
     for (const mold of workpiece.Molds) {
       const pivot = mold.WorkPieceMold;
       const quantity = pivot.quantity || 1;
@@ -520,6 +519,15 @@ app.get('/image/material/:id', async (req, res) => {
     }
   } catch (err) {
     res.status(500).send("Fehler beim Abrufen des Bildes: " + err);
+  }
+});
+
+app.get('/report', async (req, res) => {
+  try {
+    const workpieces = await WorkPiece.findAll({ order: [['name', 'ASC']] });
+    res.render('report', { workpieces });
+  } catch (err) {
+    res.status(500).send("Fehler beim Generieren des Reports: " + err);
   }
 });
 

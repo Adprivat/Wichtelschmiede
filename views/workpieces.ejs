@@ -41,7 +41,6 @@
   <table class="table table-bordered table-responsive">
     <thead>
       <tr>
-        <th>ID</th>
         <th>Name</th>
         <th>Bild</th>
         <th>Aktionen</th>
@@ -50,7 +49,6 @@
     <tbody>
       <% workpieces.forEach(function(wp) { %>
         <tr>
-          <td><%= wp.id %></td>
           <td><%= wp.name %></td>
           <td>
             <% if(wp.image) { %>
